@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="popup.css">
+    <title>Shopee Calculator</title>
+</head>
+<body>
+    <div class="container">
+        <h2>Shopee Calculator 🛒</h2>
+
+        <p>
+            Acesse <strong>Minhas Compras</strong>, role até o final
+            para carregar os pedidos e clique abaixo.
+        </p>
+
+        <button id="calculateBtn">Calcular Gastos</button>
+        <p id="statusMessage" class="status-message" aria-live="polite"></p>
+
+        <div class="result-box">
+            <h3>Resumo dos pedidos</h3>
+
+            <div class="info-row">
+                <span>Total de pedidos</span>
+                <strong id="totalOrders">—</strong>
+            </div>
+
+            <div class="info-row">
+                <span>Pedidos comprados</span>
+                <strong id="purchasedOrders">—</strong>
+            </div>
+
+            <div class="info-row">
+                <span>Pedidos reembolsados ou cancelados</span>
+                <strong id="cancelledRefundedOrders">—</strong>
+            </div>
+        </div>
+
+        <div class="result-box financial-box">
+            <h3>Resumo financeiro</h3>
+
+            <div class="info-row">
+                <span>Valor total (comprados)</span>
+                <strong id="purchasedAmount">R$ 0,00</strong>
+            </div>
+
+            <div class="info-row">
+                <span>Valor total (reembolsados ou cancelados)</span>
+                <strong id="cancelledRefundedAmount">R$ 0,00</strong>
+            </div>
+
+            <div class="info-row total-row">
+                <span>Soma total</span>
+                <strong id="grandTotal">R$ 0,00</strong>
+            </div>
+        </div>
+
+        <p class="footer">
+            Resultado baseado nos pedidos carregados na página.
+        </p>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
