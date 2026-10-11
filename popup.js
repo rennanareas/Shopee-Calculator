@@ -39,7 +39,6 @@ document.getElementById("calculateBtn").addEventListener("click", async () => {
             statusMessage.classList.add("visible");
         }
 
-        // Nova funcionalidade: rola a aba da Shopee.
         const scrollResults = await chrome.scripting.executeScript({
             target: { tabId: tab.id },
             func: scrollShopeeToEnd
@@ -55,7 +54,6 @@ document.getElementById("calculateBtn").addEventListener("click", async () => {
 
         btn.textContent = "Calculando...";
 
-        // Executa o cálculo original.
         const results = await chrome.scripting.executeScript({
             target: { tabId: tab.id },
             func: calculateShopeeTotal
@@ -105,8 +103,6 @@ document.getElementById("calculateBtn").addEventListener("click", async () => {
     }
 });
 
-
-// NOVO: rolagem automática da página da Shopee.
 async function scrollShopeeToEnd() {
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -125,7 +121,6 @@ async function scrollShopeeToEnd() {
 
         scrollingElement.scrollTop = scrollingElement.scrollHeight;
 
-        // Aguarda a renderização dos novos pedidos.
         await wait(1000);
 
         const currentHeight = scrollingElement.scrollHeight;
@@ -153,7 +148,6 @@ async function scrollShopeeToEnd() {
         previousHeight = currentHeight;
         previousOrderCount = currentOrderCount;
 
-        // Encerra após quatro verificações sem mudanças.
         if (stableRounds >= 4) {
             return {
                 success: true,
@@ -162,15 +156,12 @@ async function scrollShopeeToEnd() {
         }
     }
 
-    // Evita execução infinita.
     return {
         success: false,
         ordersDetected: previousOrderCount
     };
 }
 
-
-// A função de cálculo original permanece abaixo.
 function calculateShopeeTotal() {
     let purchasedCents = 0;
     let cancelledRefundedCents = 0;
