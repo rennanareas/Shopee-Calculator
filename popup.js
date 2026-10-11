@@ -1,4 +1,3 @@
-
 document.getElementById("calculateBtn").addEventListener("click", async () => {
     const btn = document.getElementById("calculateBtn");
     const statusMessage = document.getElementById("statusMessage");
