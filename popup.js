@@ -1,3 +1,4 @@
+
 document.getElementById("calculateBtn").addEventListener("click", async () => {
     const btn = document.getElementById("calculateBtn");
     const statusMessage = document.getElementById("statusMessage");
@@ -29,95 +30,147 @@ document.getElementById("calculateBtn").addEventListener("click", async () => {
             return;
         }
 
-        btn.textContent = "Calculando...";
+        btn.textContent = "Carregando pedidos...";
         btn.disabled = true;
 
         if (statusMessage) {
             statusMessage.textContent =
-                "Analisando os pedidos carregados...";
+                "Rolando a página e carregando os pedidos...";
             statusMessage.classList.add("visible");
         }
 
-        chrome.scripting.executeScript(
-            {
-                target: { tabId: tab.id },
-                func: calculateShopeeTotal
-            },
-            results => {
-                btn.textContent = "Calcular Gastos";
-                btn.disabled = false;
+        // Nova funcionalidade: rola a aba da Shopee.
+        const scrollResults = await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: scrollShopeeToEnd
+        });
 
-                if (chrome.runtime.lastError) {
-                    console.error(
-                        "Erro ao executar o cálculo:",
-                        chrome.runtime.lastError.message
-                    );
+        const scrollResult = scrollResults?.[0]?.result;
 
-                    if (statusMessage) {
-                        statusMessage.textContent =
-                            "Erro ao executar o cálculo na Shopee.";
-                    }
+        if (statusMessage) {
+            statusMessage.textContent = scrollResult?.success
+                ? "Carregamento concluído. Calculando gastos..."
+                : "Limite de espera atingido. Calculando os pedidos carregados...";
+        }
 
-                    return;
-                }
+        btn.textContent = "Calculando...";
 
-                const result = results?.[0]?.result;
+        // Executa o cálculo original.
+        const results = await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: calculateShopeeTotal
+        });
 
-                if (!result || result.error) {
-                    if (statusMessage) {
-                        statusMessage.textContent =
-                            result?.error ||
-                            "Não foi possível encontrar os pedidos.";
-                    }
+        const result = results?.[0]?.result;
 
-                    return;
-                }
+        if (!result || result.error) {
+            throw new Error(
+                result?.error || "Não foi possível encontrar os pedidos."
+            );
+        }
 
-                setText("totalOrders", result.totalOrders);
-                setText("purchasedOrders", result.purchasedOrders);
+        setText("totalOrders", result.totalOrders);
+        setText("purchasedOrders", result.purchasedOrders);
 
-                setText(
-                    "cancelledRefundedOrders",
-                    result.cancelledRefundedOrders
-                );
-
-                setText(
-                    "purchasedAmount",
-                    money(result.purchasedCents)
-                );
-
-                setText(
-                    "cancelledRefundedAmount",
-                    money(result.cancelledRefundedCents)
-                );
-
-                setText(
-                    "grandTotal",
-                    money(result.grandTotalCents)
-                );
-
-                if (statusMessage) {
-                    statusMessage.textContent =
-                        `Cálculo concluído: ${result.totalOrders} pedidos encontrados.`;
-                }
-            }
+        setText(
+            "cancelledRefundedOrders",
+            result.cancelledRefundedOrders
         );
-    } catch (error) {
-        console.error("Erro inesperado:", error);
 
-        btn.textContent = "Calcular Gastos";
-        btn.disabled = false;
+        setText("purchasedAmount", money(result.purchasedCents));
+
+        setText(
+            "cancelledRefundedAmount",
+            money(result.cancelledRefundedCents)
+        );
+
+        setText("grandTotal", money(result.grandTotalCents));
 
         if (statusMessage) {
             statusMessage.textContent =
-                "Erro inesperado ao calcular os gastos. Tente novamente.";
+                `Cálculo concluído: ${result.totalOrders} pedidos encontrados.`;
+        }
+    } catch (error) {
+        console.error("Erro ao carregar ou calcular os pedidos:", error);
 
+        if (statusMessage) {
+            statusMessage.textContent =
+                error?.message ||
+                "Erro inesperado ao calcular os gastos. Tente novamente.";
             statusMessage.classList.add("visible");
         }
+    } finally {
+        btn.textContent = "Calcular Gastos";
+        btn.disabled = false;
     }
 });
 
 
+// NOVO: rolagem automática da página da Shopee.
+async function scrollShopeeToEnd() {
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+    let previousHeight = -1;
+    let previousOrderCount = -1;
+    let stableRounds = 0;
+
+    for (let attempt = 0; attempt < 120; attempt++) {
+        const scrollingElement =
+            document.scrollingElement || document.documentElement;
+
+        window.scrollTo({
+            top: scrollingElement.scrollHeight,
+            behavior: "auto"
+        });
+
+        scrollingElement.scrollTop = scrollingElement.scrollHeight;
+
+        // Aguarda a renderização dos novos pedidos.
+        await wait(1000);
+
+        const currentHeight = scrollingElement.scrollHeight;
+
+        const currentOrderCount = Array.from(
+            document.querySelectorAll("div, span, label")
+        ).filter(element => {
+            const text = (element.innerText || "").trim().toUpperCase();
+
+            return (
+                text === "TOTAL DO PEDIDO:" ||
+                text === "TOTAL DO PEDIDO"
+            );
+        }).length;
+
+        if (
+            currentHeight === previousHeight &&
+            currentOrderCount === previousOrderCount
+        ) {
+            stableRounds++;
+        } else {
+            stableRounds = 0;
+        }
+
+        previousHeight = currentHeight;
+        previousOrderCount = currentOrderCount;
+
+        // Encerra após quatro verificações sem mudanças.
+        if (stableRounds >= 4) {
+            return {
+                success: true,
+                ordersDetected: currentOrderCount
+            };
+        }
+    }
+
+    // Evita execução infinita.
+    return {
+        success: false,
+        ordersDetected: previousOrderCount
+    };
+}
+
+
+// A função de cálculo original permanece abaixo.
 function calculateShopeeTotal() {
     let purchasedCents = 0;
     let cancelledRefundedCents = 0;

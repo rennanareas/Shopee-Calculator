@@ -11,13 +11,13 @@
     <div class="container">
         <h2>Shopee Calculator 🛒</h2>
 
-        <p>
-            Acesse <strong>Minhas Compras</strong>, role até o final
-            para carregar os pedidos e clique abaixo.
+        <p class="description">
+            Acesse <strong>Minhas Compras</strong> da Shopee e clique abaixo.
+            A extensão vai rolar a página para carregar os pedidos antes de calcular.
         </p>
 
-        <button id="calculateBtn">Calcular Gastos</button>
-        <p id="statusMessage" class="status-message" aria-live="polite"></p>
+        <button id="calculateBtn" type="button">Calcular Gastos</button>
+        <p id="statusMessage" class="status-message" aria-live="polite" role="status"></p>
 
         <div class="result-box">
             <h3>Resumo dos pedidos</h3>
@@ -58,7 +58,7 @@
         </div>
 
         <p class="footer">
-            Resultado baseado nos pedidos carregados na página.
+            O resultado considera os pedidos carregados na página.
         </p>
     </div>
 
