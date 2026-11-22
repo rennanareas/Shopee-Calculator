@@ -1,3 +1,4 @@
+```markdown
 # Shopee Expense Calculator
 
 A Google Chrome extension that helps you track your spending on **Shopee Brazil**, gathering and totaling order amounts in a simple and practical interface.
@@ -31,3 +32,32 @@ A Google Chrome extension that helps you track your spending on **Shopee Brazil*
 1. Clone this repository:
    ```bash
    git clone [https://github.com/rennanareas/Shopee-Calculator.git](https://github.com/rennanareas/Shopee-Calculator.git)
+
+```
+
+2. Open `chrome://extensions` in Google Chrome.
+3. Enable **Developer mode** in the top-right corner.
+4. Click **Load unpacked**.
+5. Select the project folder containing the `manifest.json` file.
+
+## 🔒 Privacy
+
+This extension uses order information displayed on the Shopee page solely to perform the calculations. Data handling practices and requested permissions reflect the extension's actual functionality. Please refer to the published Privacy Policy for more details.
+
+* **Privacy Policy:** *Add the public link to your privacy policy here.*
+
+## ⚠️ Notes
+
+* Calculations only consider orders that the extension can identify on the currently loaded page.
+* Accuracy depends on Shopee's page structure and the order statuses recognized by the extension.
+* Updates to Shopee's website layout may require adjustments to the extension's code.
+
+## 👨‍💻 Author
+
+Developed by **Rennan Alves**, with the support of AI coding assistants.
+
+If you find this project useful, feel free to follow its progress through this repository!
+
+```
+
+```
